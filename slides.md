@@ -1,0 +1,164 @@
+---
+marp: true
+theme: default
+paginate: true
+style: |
+  section {
+    font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+    font-size: 28px;
+  }
+  section.lead {
+    text-align: center;
+    justify-content: center;
+  }
+  section.lead h1 {
+    font-size: 96px;
+    font-weight: 900;
+    color: #1a1a2e;
+    letter-spacing: 4px;
+  }
+  section.lead p {
+    font-size: 24px;
+    color: #555;
+  }
+  h2 {
+    border-bottom: 3px solid #4a90e2;
+    padding-bottom: 8px;
+    color: #1a1a2e;
+  }
+  table {
+    font-size: 22px;
+    width: 100%;
+  }
+  th {
+    background: #4a90e2;
+    color: white;
+  }
+  strong {
+    color: #4a90e2;
+  }
+  ul li {
+    margin-bottom: 8px;
+  }
+---
+
+<!-- _class: lead -->
+
+# GenBI
+
+**用 LLM 解開 BI 報表的最後一哩路**
+
+---
+
+## Laurence Chen / 陳家宏
+
+- Clojure、dbt-Taipei 線下活動主辦人
+- IT 顧問、講者、作家
+- 《從試算表到資料平台－重構資料工程的技術與團隊》
+
+![](images/book.png)
+
+---
+
+## Agenda
+
+1. BI 報表的最後一哩路
+2. LLM && GenBI
+3. Security Issues
+4. Cost Issues
+5. Operational Issues
+6. REPLWARE 服務介紹
+
+---
+
+## BI 報表的最後一哩路
+
+假設你的公司已經有了 (數據中台) **Modern Data Stack**，資料倉儲的資料已整理好了。
+
+但是，你的 user 告訴你：
+
+- 😕 **「很難用，因為我不會寫 SQL」**
+- 🐌 **「很難用，BI 的 pivot table 超慢」**
+
+---
+
+## 解法的矛盾
+
+**BI Visualization Layer**
+- Application 生成 SQL
+- 彈性有限
+- 效能問題（N+1 problem）
+
+**Pure SQL**
+- 幾乎可以處理 95% 的問題
+- 一般 user 不會寫
+
+---
+
+## 用 LLM 來生成 SQL
+
+用 LLM 來理解三件事：
+
+1. 理解 **Ontology**（資料語意）
+2. 理解 **User Intention**（使用者意圖）
+3. **翻譯** Intention → Query
+
+---
+
+## Wren AI
+
+![bg contain](images/wren-ai.png)
+
+---
+
+## Security Issues
+
+> 公司資料庫裡的資料會不會外流到 LLM provider？
+
+- 只傳送 **Ontology（結構定義）**，不傳原始資料
+- 實際資料留在你自己的資料庫
+- 可搭配 private/local LLM 方案
+
+---
+
+## Cost Issues
+
+> 會不會跑一跑，LLM 的帳單就幾十萬？
+
+- **Text-to-SQL** 算是非常有效率的應用
+- 每次查詢只需少量 token
+- 遠低於文件摘要、RAG 等應用的成本
+
+---
+
+## Operational Issues
+
+> 安裝了之後，有沒有辦法調整？結果不穩定怎麼辦？
+
+- Wren AI 是**開源軟體**，所有設定可控
+- Wren AI 也有**商業版**
+- 可針對 ontology、prompt 做客製化調整
+- 專業人士協助維運，降低不確定性
+
+---
+
+## 你需要顧問服務嗎？
+
+|  | **REPLWARE 導入** | **自行導入** |
+|---|:---:|:---:|
+| 估時 | 最快 **3 個月** | ≥ 12 個月 |
+| Wren-AI 最佳實踐 | ✅ | ❓ |
+| Wren-AI 客製化調整 | ✅ | ❓ |
+| 人員流動風險 | 低 | 偏高 |
+
+---
+
+## REPLWARE 的服務簡介
+
+**協助導入 Wren-AI**
+
+- 安裝問題排除
+- 教學、訓練 AI Engineer
+- 特殊客製化需求
+- 自編教材
+- 導入協作 && 長期維護
