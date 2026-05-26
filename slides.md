@@ -46,7 +46,7 @@ style: |
 
 # GenBI
 
-**用 LLM 解開 BI 報表的最後一哩路**
+**BI 報表的最後一哩路**
 
 ---
 
@@ -62,12 +62,10 @@ style: |
 
 ## Agenda
 
-1. BI 報表的最後一哩路
-2. LLM && GenBI
-3. Security Issues
-4. Cost Issues
-5. Operational Issues
-6. REPLWARE 服務介紹
+* BI 報表的最後一哩路
+* LLM && GenBI
+* Security Issues
+* Cost Issues
 
 ---
 
@@ -128,37 +126,3 @@ style: |
 - **Text-to-SQL** 算是非常有效率的應用
 - 每次查詢只需少量 token
 - 遠低於文件摘要、RAG 等應用的成本
-
----
-
-## Operational Issues
-
-> 安裝了之後，有沒有辦法調整？結果不穩定怎麼辦？
-
-- Wren AI 是**開源軟體**，所有設定可控
-- Wren AI 也有**商業版**
-- 可針對 ontology、prompt 做客製化調整
-- 專業人士協助維運，降低不確定性
-
----
-
-## 你需要顧問服務嗎？
-
-|  | **REPLWARE 導入** | **自行導入** |
-|---|:---:|:---:|
-| 估時 | 最快 **3 個月** | ≥ 12 個月 |
-| Wren-AI 最佳實踐 | ✅ | ❓ |
-| Wren-AI 客製化調整 | ✅ | ❓ |
-| 人員流動風險 | 低 | 偏高 |
-
----
-
-## REPLWARE 的服務簡介
-
-**協助導入 Wren-AI**
-
-- 安裝問題排除
-- 教學、訓練 AI Engineer
-- 特殊客製化需求
-- 自編教材
-- 導入協作 && 長期維護
