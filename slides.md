@@ -76,7 +76,7 @@ style: |
 但是，你的 user 告訴你：
 
 - 😕 **「很難用，因為我不會寫 SQL」**
-- 🐌 **「很難用，BI 的 pivot table 超慢」**
+- 🐌 **「很難用，有一些複雜的需求，不知如何表達」**
 
 ---
 
@@ -85,7 +85,6 @@ style: |
 **BI Visualization Layer**
 - Application 生成 SQL
 - 彈性有限
-- 效能問題（N+1 problem）
 
 **Pure SQL**
 - 幾乎可以處理 95% 的問題
@@ -114,7 +113,6 @@ style: |
 > 公司資料庫裡的資料會不會外流到 LLM provider？
 
 - 只傳送 **Ontology（結構定義）**，不傳原始資料
-- 實際資料留在你自己的資料庫
 - 可搭配 private/local LLM 方案
 
 ---
@@ -125,4 +123,10 @@ style: |
 
 - **Text-to-SQL** 算是非常有效率的應用
 - 每次查詢只需少量 token
-- 遠低於文件摘要、RAG 等應用的成本
+
+---
+## Primary Concerns
+
+- 是否與 BI view layer 整合？Metabase 有 Metabot
+- 產生的 SQL 查詢準不準？
+- 權限管控？
