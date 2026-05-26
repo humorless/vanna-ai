@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanna-AI Manufacturing POC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: #999;
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            text-align: center;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading-spinner.active {
+            display: block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .schema-panel {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .schema-panel h3 {
+            color: #667eea;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .schema-table {
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .schema-table strong {
+            display: block;
+            color: #333;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .schema-table .columns {
+            margin-left: 15px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .schema-table .column-item {
+            padding: 3px 0;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .message-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+            display: none;
+        }
+
+        .message-box.active {
+            display: block;
+        }
+
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            border-left-color: #c33;
+        }
+
+        .success-message {
+            background-color: #efe;
+            color: #3c3;
+            border-left-color: #3c3;
+        }
+
+        .sql-section {
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .sql-section.active {
+            display: block;
+        }
+
+        .sql-section h3 {
+            color: #333;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .sql-output {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', 'Monaco', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            line-height: 1.4;
+            border: 1px solid #444;
+        }
+
+        .table-section {
+            display: none;
+        }
+
+        .table-section.active {
+            display: block;
+        }
+
+        .table-section h3 {
+            color: #333;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .row-count {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background-color: #f0f0f0;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-weight: 600;
+            color: #333;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #555;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header .subtitle {
+                font-size: 0.95rem;
+            }
+
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+
+            .schema-panel {
+                max-height: 300px;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🏭 Vanna-AI Manufacturing POC</h1>
+        <p class="subtitle">Natural Language to SQL powered by Claude</p>
+    </div>
+
+    <!-- Main Container with Two Panels -->
+    <div class="main-container">
+        <!-- Left Panel: Query & Schema -->
+        <div class="panel">
+            <h2>Query & Schema</h2>
+
+            <div class="form-group">
+                <label for="userRole">Your Role:</label>
+                <select id="userRole">
+                    <option value="operator">Operator (Limited Access)</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="director">Director (Full Access)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="question">Ask a question:</label>
+                <input
+                    type="text"
+                    id="question"
+                    placeholder="e.g., How many production orders are pending?"
+                    required>
+            </div>
+
+            <button id="submitBtn">Execute Query</button>
+
+            <div id="loadingSpinner" class="loading-spinner">
+                <span>⏳ Generating SQL...</span>
+            </div>
+
+            <!-- Schema Panel -->
+            <div class="schema-panel">
+                <h3>Available Tables & Columns</h3>
+                <div id="schemaContent" class="schema-table">
+                    <p style="color: #999;">Loading schema...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Results -->
+        <div class="panel">
+            <h2>Results</h2>
+
+            <div id="resultsSection" class="results-section">
+                <!-- Error Message -->
+                <div id="errorMessage" class="message-box error-message"></div>
+
+                <!-- Success Message -->
+                <div id="successMessage" class="message-box success-message"></div>
+
+                <!-- SQL Output -->
+                <div id="sqlSection" class="sql-section">
+                    <h3>Generated SQL:</h3>
+                    <div class="sql-output" id="sqlCode"></div>
+                </div>
+
+                <!-- Results Table -->
+                <div id="tableSection" class="table-section">
+                    <div class="row-count" id="rowCount"></div>
+                    <table id="resultsTable">
+                        <thead id="tableHead"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- No Results Yet Message -->
+            <div id="noResults" style="color: #999; text-align: center; padding: 40px 0;">
+                Execute a query to see results here
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const userRoleSelect = document.getElementById('userRole');
+        const questionInput = document.getElementById('question');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const resultsSection = document.getElementById('resultsSection');
+        const noResults = document.getElementById('noResults');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const sqlSection = document.getElementById('sqlSection');
+        const sqlCode = document.getElementById('sqlCode');
+        const tableSection = document.getElementById('tableSection');
+        const rowCount = document.getElementById('rowCount');
+        const tableHead = document.getElementById('tableHead');
+        const tableBody = document.getElementById('tableBody');
+        const schemaContent = document.getElementById('schemaContent');
+
+        /**
+         * Load schema for the selected role and display it in the schema panel.
+         */
+        async function loadSchema() {
+            const role = userRoleSelect.value;
+            try {
+                const response = await fetch(`/tables?user_role=${encodeURIComponent(role)}`);
+                const schema = await response.json();
+
+                if (!response.ok || !schema) {
+                    schemaContent.textContent = 'Unable to load schema';
+                    return;
+                }
+
+                // Clear existing schema content
+                while (schemaContent.firstChild) {
+                    schemaContent.removeChild(schemaContent.firstChild);
+                }
+
+                // Build schema display
+                for (const [tableName, columns] of Object.entries(schema)) {
+                    const tableDiv = document.createElement('div');
+                    tableDiv.style.marginBottom = '12px';
+
+                    const tableName_elem = document.createElement('strong');
+                    tableName_elem.textContent = tableName;
+                    tableDiv.appendChild(tableName_elem);
+
+                    const columnsDiv = document.createElement('div');
+                    columnsDiv.className = 'columns';
+                    columns.forEach(col => {
+                        const colItem = document.createElement('div');
+                        colItem.className = 'column-item';
+                        colItem.textContent = '• ' + col;
+                        columnsDiv.appendChild(colItem);
+                    });
+                    tableDiv.appendChild(columnsDiv);
+
+                    schemaContent.appendChild(tableDiv);
+                }
+            } catch (err) {
+                schemaContent.textContent = 'Error loading schema: ' + err.message;
+            }
+        }
+
+        /**
+         * Display error message in the error box.
+         */
+        function displayError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+            successMessage.classList.remove('active');
+            sqlSection.classList.remove('active');
+            tableSection.classList.remove('active');
+        }
+
+        /**
+         * Display success message in the success box.
+         */
+        function displaySuccess(message) {
+            successMessage.textContent = message;
+            successMessage.classList.add('active');
+        }
+
+        /**
+         * Display SQL query in the SQL output box.
+         * Validates that the SQL is a string before displaying.
+         */
+        function displaySQL(query) {
+            // Validate SQL is a string to prevent XSS
+            if (typeof query !== 'string') {
+                displayError('Invalid SQL format received from server');
+                return;
+            }
+
+            // Additional validation: ensure it looks like SQL (basic check)
+            const sqlTrimmed = query.trim().toUpperCase();
+            if (!sqlTrimmed.match(/^(SELECT|INSERT|UPDATE|DELETE|WITH|CREATE|ALTER|DROP|EXPLAIN)/)) {
+                displayError('Invalid SQL: response does not appear to be valid SQL');
+                return;
+            }
+
+            sqlCode.textContent = query;
+            sqlSection.classList.add('active');
+        }
+
+        /**
+         * Display results table with column headers and rows.
+         */
+        function displayResults(columns, results) {
+            // Clear existing table content
+            tableHead.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // Build header row
+            const headerRow = document.createElement('tr');
+            columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            tableHead.appendChild(headerRow);
+
+            // Build body rows
+            results.forEach(row => {
+                const tr = document.createElement('tr');
+                columns.forEach(col => {
+                    const td = document.createElement('td');
+                    const value = row[col];
+                    td.textContent = value !== null && value !== undefined ? String(value) : '(null)';
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+
+            // Display row count
+            rowCount.textContent = 'Retrieved ' + results.length + ' row(s)';
+            tableSection.classList.add('active');
+        }
+
+        /**
+         * Reset UI state and show loading spinner.
+         */
+        function showLoading() {
+            loadingSpinner.classList.add('active');
+            submitBtn.disabled = true;
+            errorMessage.classList.remove('active');
+            successMessage.classList.remove('active');
+            sqlSection.classList.remove('active');
+            tableSection.classList.remove('active');
+            noResults.style.display = 'none';
+            resultsSection.classList.add('active');
+        }
+
+        /**
+         * Hide loading spinner.
+         */
+        function hideLoading() {
+            loadingSpinner.classList.remove('active');
+            submitBtn.disabled = false;
+        }
+
+        /**
+         * Submit query to the backend and display results.
+         */
+        async function submitQuery() {
+            const question = questionInput.value.trim();
+            const userRole = userRoleSelect.value;
+
+            if (!question) {
+                displayError('Please enter a question');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        user_role: userRole
+                    })
+                });
+
+                const data = await response.json();
+                hideLoading();
+
+                // Validate response structure
+                if (!data || typeof data !== 'object') {
+                    displayError('Invalid response format from server');
+                    return;
+                }
+
+                // Check for errors
+                if (data.error) {
+                    displayError(data.error);
+                    return;
+                }
+
+                // Validate required fields exist
+                if (typeof data.sql !== 'string') {
+                    displayError('SQL format error: expected string from server');
+                    return;
+                }
+
+                if (!Array.isArray(data.results)) {
+                    displayError('Results format error: expected array');
+                    return;
+                }
+
+                if (!Array.isArray(data.columns)) {
+                    displayError('Columns format error: expected array');
+                    return;
+                }
+
+                // Display SQL
+                displaySQL(data.sql);
+
+                // Display results or success message
+                if (data.results.length > 0) {
+                    displaySuccess('Query executed successfully');
+                    displayResults(data.columns, data.results);
+                } else {
+                    displaySuccess('Query executed successfully - no results returned');
+                }
+
+            } catch (err) {
+                hideLoading();
+                displayError('Error: ' + err.message);
+            }
+        }
+
+        /**
+         * Handle role change - reload schema and reset results.
+         */
+        function handleRoleChange() {
+            // Clear and show loading message
+            while (schemaContent.firstChild) {
+                schemaContent.removeChild(schemaContent.firstChild);
+            }
+            const loadingMsg = document.createElement('p');
+            loadingMsg.style.color = '#999';
+            loadingMsg.textContent = 'Loading schema...';
+            schemaContent.appendChild(loadingMsg);
+
+            noResults.style.display = 'block';
+            resultsSection.classList.remove('active');
+            loadSchema();
+        }
+
+        /**
+         * Handle Enter key press in question input.
+         */
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitQuery();
+            }
+        }
+
+        // Event Listeners
+        userRoleSelect.addEventListener('change', handleRoleChange);
+        submitBtn.addEventListener('click', submitQuery);
+        questionInput.addEventListener('keypress', handleKeyPress);
+
+        // Initialize - load schema for default role
+        loadSchema();
+    </script>
+</body>
+</html>
