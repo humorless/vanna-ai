@@ -1,13 +1,13 @@
 # 🏭 Vanna-AI 製造業 POC
 
-用自然語言查詢資料庫的智能系統，整合 Claude AI 和以角色為基礎的存取控制。
+用自然語言查詢資料庫的智能系統，整合 OpenRouter AI 和以角色為基礎的存取控制。
 
 ## 概述
 
-Vanna-AI 製造業 POC 是一個全端應用程式，讓使用者能用自然語言向資料庫提問，系統自動產生 SQL 查詢語句。本系統實作了以角色為基礎的存取控制（RBAC），不同的使用者角色只能存取獲授權的資料表。
+Vanna-AI 製造業 POC 是一個全端應用程式，讓使用者能用自然語言向資料庫提問，系統自動產生 SQL 查詢語句。本系統使用 OpenRouter 提供的各種 AI 模型，並實作了以角色為基礎的存取控制（RBAC），不同的使用者角色只能存取獲授權的資料表。
 
 **核心特色：**
-- 🤖 Claude AI 驅動的自然語言轉 SQL 功能
+- 🤖 OpenRouter AI 驅動的自然語言轉 SQL 功能（支援 Claude、Llama、GPT 等模型）
 - 🔐 三層角色權限控制（作業員/主管/總經理）
 - 📊 製造業資料模型（產品、零件、庫存、生產訂單）
 - 🎨 響應式網頁介面
@@ -19,7 +19,7 @@ Vanna-AI 製造業 POC 是一個全端應用程式，讓使用者能用自然語
 
 - Python 3.9 以上版本
 - pip（套件管理器）
-- 選項：ANTHROPIC_API_KEY（用於 Claude 整合）
+- **必須：OPENROUTER_API_KEY**（OpenRouter API 金鑰）
 
 ### 安裝依賴套件
 
@@ -208,15 +208,31 @@ curl -X POST http://localhost:8000/ask \
 
 ## 環境變數
 
-### ANTHROPIC_API_KEY（選項）
-Claude API 金鑰，用於自然語言 SQL 產生。
+### OPENROUTER_API_KEY（**必須**）
+OpenRouter API 金鑰，用於自然語言 SQL 產生。可於 [https://openrouter.ai](https://openrouter.ai) 註冊取得。
 
 ```bash
-export ANTHROPIC_API_KEY="sk-..."
+export OPENROUTER_API_KEY="sk-or-..."
 python app.py
 ```
 
-若未設定，系統會使用模擬 SQL 產生進行測試。
+### LLM_MODEL（選項）
+要使用的 AI 模型。預設值：`meta-llama/llama-3.1-70b-instruct`
+
+可用的模型範例：
+- `meta-llama/llama-3.1-70b-instruct` — Llama 3.1 70B（預設，快速免費）
+- `claude-3.5-sonnet` — Claude 3.5 Sonnet（準確度高）
+- `gpt-4o` — OpenAI GPT-4o
+- `mistral/mistral-large` — Mistral Large
+
+設定自訂模型：
+```bash
+export OPENROUTER_API_KEY="sk-or-..."
+export LLM_MODEL="claude-3.5-sonnet"
+python app.py
+```
+
+若未設定 OPENROUTER_API_KEY，系統會使用模擬 SQL 產生進行測試。
 
 ## 技術堆疊
 
@@ -225,7 +241,7 @@ python app.py
 | 後端框架 | FastAPI | 0.104.1 |
 | 伺服器 | Uvicorn | 0.24.0 |
 | 資料驗證 | Pydantic | 2.5.0 |
-| AI 整合 | Anthropic SDK | ≥0.30.0 |
+| AI 整合 | OpenAI SDK（for OpenRouter） | ≥1.0.0 |
 | SQL 工具 | Vanna | 0.3.0 |
 | 資料庫 | SQLite 3 | 內建 |
 | 前端 | HTML5/JavaScript | 原生 |

@@ -1,11 +1,10 @@
-"""FastAPI server for manufacturing POC with Claude integration and role-based access control."""
+"""FastAPI server for manufacturing POC with OpenRouter AI integration and role-based access control."""
 
-import json
+import os
 import sqlite3
-from typing import List
 
 import uvicorn
-from anthropic import Anthropic
+from openai import OpenAI
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -26,10 +25,16 @@ except Exception:
     # Static directory may not exist yet
     pass
 
-# Initialize Anthropic client
-client = Anthropic()
+# Initialize OpenRouter client
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+LLM_MODEL = os.getenv("LLM_MODEL", "meta-llama/llama-3.1-70b-instruct")
 
-# System prompt for Claude
+client = OpenAI(
+    api_key=OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1"
+)
+
+# System prompt for LLM
 SYSTEM_PROMPT = """You are an expert SQL database architect and query generator for a manufacturing database.
 
 The database contains the following tables and relationships:
@@ -104,7 +109,7 @@ def get_schema() -> dict:
 
 def generate_sql(question: str) -> str:
     """
-    Generate SQL from a natural language question using Claude.
+    Generate SQL from a natural language question using OpenRouter LLM.
 
     Args:
         question: Natural language question about the database
@@ -112,22 +117,23 @@ def generate_sql(question: str) -> str:
     Returns:
         SQL query string
     """
-    conversation_history = [
-        {
-            "role": "user",
-            "content": question,
-        }
-    ]
-
     try:
-        response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+        response = client.chat.completions.create(
+            model=LLM_MODEL,
             max_tokens=1024,
-            system=SYSTEM_PROMPT,
-            messages=conversation_history,
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT,
+                },
+                {
+                    "role": "user",
+                    "content": question,
+                }
+            ],
         )
 
-        sql_query = response.content[0].text.strip()
+        sql_query = (response.choices[0].message.content or "").strip()
     except Exception as e:
         # Fallback to simple mock queries for testing when API key is unavailable
         q_lower = question.lower()
