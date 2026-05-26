@@ -66,6 +66,28 @@ Build a working POC that demonstrates Vanna-AI's text-to-SQL capabilities using 
 - CSS (inline)
 - No build tools required
 
+### 2.3 Access Control Architecture
+
+Three role-based access groups with table-level permissions:
+
+```
+User → Role (Operator/Supervisor/Director) → Accessible Tables
+  
+Operator:
+  - production_orders (read only)
+  - inventory (read only)
+
+Supervisor:
+  - production_orders (read only)
+  - inventory (read only)
+  - products (read only)
+
+Director:
+  - All tables (full read access)
+```
+
+Each query is validated against user's role before execution.
+
 ---
 
 ## 3. Database Schema
@@ -119,11 +141,25 @@ CREATE TABLE production_orders (
 );
 ```
 
+**users** (for demo/testing)
+```sql
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  role TEXT NOT NULL  -- 'operator', 'supervisor', 'director'
+);
+```
+
 ### 3.2 Sample Data
 - 20-30 products (various manufacturing categories)
 - 60-100 parts (components across products)
 - 100+ inventory records (realistic stock levels)
 - 50-100 production orders (mix of statuses)
+- 5 demo users:
+  - operator1 (role: operator)
+  - supervisor1 (role: supervisor)
+  - director1 (role: director)
+  - operator2, supervisor2 (additional test accounts)
 
 ---
 
@@ -137,17 +173,26 @@ Main FastAPI server with:
    - Load SQLite database (manufacturing.db)
    - Initialize Anthropic Claude LLM service
    - Create Vanna Agent with DemoAgentMemory
-   - Register SQL execution tool
+   - Register SQL execution tool with access control
 
 2. **Endpoints**
    - `GET /` - Serve static/index.html
-   - `GET /tables` - Return list of tables and columns
-   - `POST /ask` - Accept query, return SQL + results
-     - Input: `{ "question": "..." }`
-     - Output: `{ "sql": "...", "results": [...], "columns": [...] }`
+   - `GET /tables` - Return list of tables and columns (filtered by user role)
+   - `POST /ask` - Accept query + user role, return SQL + results
+     - Input: `{ "question": "...", "user_role": "operator|supervisor|director" }`
+     - Output: `{ "sql": "...", "results": [...], "columns": [...], "error": null }`
+   - Validates generated SQL against user's allowed tables before execution
 
-3. **Error Handling**
+3. **Access Control**
+   - Role-based filtering: before returning results, check if user can access the queried tables
+   - Operator: production_orders, inventory
+   - Supervisor: production_orders, inventory, products
+   - Director: all tables
+   - Return clear error if user tries to query inaccessible table
+
+4. **Error Handling**
    - Invalid SQL catches and returns friendly messages
+   - Access denied errors (user queried unauthorized table)
    - Missing API key validation
    - Database connection errors
 
@@ -161,6 +206,15 @@ Pre-load DemoAgentMemory with 5-10 example question-SQL pairs:
 
 This gives Claude context for generating better SQL.
 
+### 4.3 Access Control Helper
+
+Create `utils/access_control.py` with:
+- `ROLE_PERMISSIONS` dict mapping roles to allowed tables
+- `validate_query_access(sql: str, user_role: str) -> bool` function
+- `filter_schema_by_role(tables: list, user_role: str) -> list` function
+
+These utility functions are used by app.py endpoints to enforce permissions.
+
 ---
 
 ## 5. Frontend Implementation
@@ -170,21 +224,27 @@ This gives Claude context for generating better SQL.
 Single-page interface with sections:
 
 1. **Header** - Title, brief description
-2. **Query Input** - Text input + Submit button
-3. **Schema Panel** - Collapsible section showing tables/columns
-4. **Results Panel**
+2. **User Role Selector** - Dropdown to select role (operator/supervisor/director)
+   - Default: operator
+   - Updates available tables dynamically
+3. **Query Input** - Text input + Submit button
+4. **Schema Panel** - Collapsible section showing available tables/columns (filtered by role)
+5. **Results Panel**
    - Display generated SQL (read-only)
    - Display results in table format
    - Show row count and execution status
-5. **Error Display** - Clear error messages
+6. **Error Display** - Clear error messages (including access denied)
 
 ### 5.2 JavaScript Behavior
 
-- Submit query via fetch to `/ask`
+- User selects role from dropdown
+- Fetch `/tables` with selected role to populate schema panel
+- Submit query via fetch to `/ask` with question + user_role
 - Parse JSON response
 - Render results table dynamically
 - Display SQL for transparency
 - Handle loading states and errors
+- Handle access denied errors gracefully
 
 ---
 
@@ -257,6 +317,8 @@ vanna-ai/
 ├── data_seed.py             # Database initialization
 ├── requirements.txt         # Python dependencies
 ├── manufacturing.db         # SQLite database (generated)
+├── utils/
+│   └── access_control.py    # Role-based access control utilities
 ├── static/
 │   └── index.html          # Frontend (single HTML file)
 ├── docs/
@@ -270,19 +332,29 @@ vanna-ai/
 
 ## 10. Known Limitations & Future Work
 
+**POC Scope (In Scope):**
+- Role-based access control (3 roles: operator, supervisor, director)
+- Table-level permission enforcement
+- Demo user accounts for testing
+
 **POC Scope (Out of Scope):**
-- Authentication/authorization
-- Multi-user sessions
+- User authentication (passwords, login system) - demo only uses role selection
+- Multi-user session management
 - Caching optimization
 - Advanced analytics
 - Custom SQL validation
+- Row-level security
+- Audit logging
 
 **Future Enhancements:**
+- Add proper user authentication (login/password)
 - Persist learned queries
 - Add more industry schemas
 - Fine-tune Claude with domain-specific prompts
 - Export results to CSV/Excel
 - Query history/favorites
+- Row-level security (filter by department, etc.)
+- Audit trails for compliance
 
 ---
 
