@@ -64,14 +64,14 @@ style: |
 
 * BI 報表的最後一哩路
 * LLM && GenBI
-* Security Issues
-* Cost Issues
+* Data Privacy
+* Implementation Issues
 
 ---
 
 ## BI 報表的最後一哩路
 
-假設你的公司已經有了 (數據中台) **Modern Data Stack**，資料倉儲的資料已整理好了。
+假設你的公司已經有了 (資料平台) **Modern Data Stack**，資料倉儲的資料已整理好了。
 
 但是，你的 user 告訴你：
 
@@ -80,7 +80,7 @@ style: |
 
 ---
 
-## 解法的矛盾
+## 解法的矛盾 (problem)
 
 **BI Visualization Layer**
 - Application 生成 SQL
@@ -92,7 +92,7 @@ style: |
 
 ---
 
-## 用 LLM 來生成 SQL
+## 用 LLM 來生成 SQL (solution)
 
 用 LLM 來理解三件事：
 
@@ -102,7 +102,7 @@ style: |
 
 ---
 
-## Data privacy
+## Data Privacy
 
 > 公司資料庫裡的資料會不會外流到 LLM provider？
 
@@ -113,13 +113,23 @@ style: |
 
 ## Access Control
 
-- group-based RBAC
-- Integrate with DW's Row-level security.
+- Identity-First Architecture
 
+> 每一個 request 從進入系統的那一刻起，就攜帶著 user identity、permissions 和 workspace context，直到 tools 執行完畢。
 
 ---
-## Primary Concerns
 
-- 是否與 BI view layer 整合？Metabase 有 Metabot
-- Access control? Data privacy?
-- 產生的 SQL 查詢準不準？
+## Complex User Intent
+
+- 兩大類解法
+  - 建立「語意模型」　 
+ - 持續從記憶學習 
+
+---
+
+## Decision Criteria
+
+- 是否想要跟 BI view layer 整合？
+   - Metabase 已經有 Metabot 
+- Access control?
+- Complex User Intent？
