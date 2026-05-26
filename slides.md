@@ -102,13 +102,7 @@ style: |
 
 ---
 
-## Wren AI
-
-![bg contain](images/wren-ai.png)
-
----
-
-## Security Issues
+## Data privacy
 
 > 公司資料庫裡的資料會不會外流到 LLM provider？
 
@@ -117,16 +111,15 @@ style: |
 
 ---
 
-## Cost Issues
+## Access Control
 
-> 會不會跑一跑，LLM 的帳單就幾十萬？
+- group-based RBAC
+- Integrate with DW's Row-level security.
 
-- **Text-to-SQL** 算是非常有效率的應用
-- 每次查詢只需少量 token
 
 ---
 ## Primary Concerns
 
 - 是否與 BI view layer 整合？Metabase 有 Metabot
+- Access control? Data privacy?
 - 產生的 SQL 查詢準不準？
-- 權限管控？
