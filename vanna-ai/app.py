@@ -111,6 +111,26 @@ def get_schema() -> dict:
     return tables_with_columns
 
 
+def clean_sql(sql_text: str) -> str:
+    """
+    Clean SQL response by removing markdown formatting.
+
+    Removes ```sql ... ``` and ``` ... ``` wrappers that some LLMs add.
+    """
+    sql_text = sql_text.strip()
+
+    # Remove markdown code block markers
+    if sql_text.startswith("```"):
+        # Remove opening marker (```sql or ```)
+        sql_text = sql_text.split("\n", 1)[1] if "\n" in sql_text else sql_text[3:]
+
+    if sql_text.endswith("```"):
+        # Remove closing marker
+        sql_text = sql_text.rsplit("\n", 1)[0] if "\n" in sql_text else sql_text[:-3]
+
+    return sql_text.strip()
+
+
 def generate_sql(question: str) -> str:
     """
     Generate SQL from a natural language question using OpenRouter LLM.
@@ -137,7 +157,8 @@ def generate_sql(question: str) -> str:
             ],
         )
 
-        sql_query = (response.choices[0].message.content or "").strip()
+        raw_sql = (response.choices[0].message.content or "").strip()
+        sql_query = clean_sql(raw_sql)
     except Exception as e:
         # Fallback to simple mock queries for testing when API key is unavailable
         q_lower = question.lower()
