@@ -19,13 +19,28 @@ Vanna-AI 製造業 POC 是一個全端應用程式，讓使用者能用自然語
 
 - Python 3.9 以上版本
 - pip（套件管理器）
-- **必須：OPENROUTER_API_KEY**（OpenRouter API 金鑰）
+- **必須：OPENROUTER_API_KEY**（OpenRouter API 金鑰，可從 [https://openrouter.ai](https://openrouter.ai) 取得）
 
 ### 安裝依賴套件
 
 ```bash
 python -m pip install -r requirements.txt
 ```
+
+### 設定環境變數
+
+1. **複製範本檔案：**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **編輯 `.env` 檔案，填入你的 OpenRouter API 金鑰：**
+   ```env
+   OPENROUTER_API_KEY=sk-or-your-actual-key
+   LLM_MODEL=meta-llama/llama-3.1-70b-instruct
+   ```
+
+應用程式會自動從 `.env` 檔案讀取這些設定。
 
 ### 初始化資料庫
 
@@ -208,12 +223,14 @@ curl -X POST http://localhost:8000/ask \
 
 ## 環境變數
 
+應用程式會自動從 `.env` 檔案讀取下列環境變數：
+
 ### OPENROUTER_API_KEY（**必須**）
 OpenRouter API 金鑰，用於自然語言 SQL 產生。可於 [https://openrouter.ai](https://openrouter.ai) 註冊取得。
 
-```bash
-export OPENROUTER_API_KEY="sk-or-..."
-python app.py
+在 `.env` 檔案中設定：
+```env
+OPENROUTER_API_KEY=sk-or-your-actual-key
 ```
 
 ### LLM_MODEL（選項）
@@ -225,12 +242,13 @@ python app.py
 - `gpt-4o` — OpenAI GPT-4o
 - `mistral/mistral-large` — Mistral Large
 
-設定自訂模型：
-```bash
-export OPENROUTER_API_KEY="sk-or-..."
-export LLM_MODEL="claude-3.5-sonnet"
-python app.py
+在 `.env` 檔案中設定自訂模型：
+```env
+OPENROUTER_API_KEY=sk-or-your-actual-key
+LLM_MODEL=claude-3.5-sonnet
 ```
+
+> **提示：** `.env` 檔案已加入 `.gitignore`，不會被提交到版本控制。請複製 `.env.example` 建立 `.env` 檔案，並填入你的實際 API 金鑰。
 
 若未設定 OPENROUTER_API_KEY，系統會使用模擬 SQL 產生進行測試。
 

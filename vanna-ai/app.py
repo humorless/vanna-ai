@@ -4,6 +4,7 @@ import os
 import sqlite3
 
 import uvicorn
+from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -11,6 +12,9 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from utils.access_control import validate_query_access, filter_schema_by_role
+
+# Load environment variables from .env file
+load_dotenv()
 
 DB_PATH = "manufacturing.db"
 STATIC_DIR = "static"
